@@ -1,10 +1,49 @@
-#include"project.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-extern int color[8];
+#define MAX_SIZE 8
 
-extern short int board[MAX_SIZE][MAX_SIZE];
+void init(int n);
 
-extern int BOARD_SIZE;
+
+void shuffle();
+
+void shift_left(int n);
+void shift_right(int n);
+void shift_up(int n);
+void shift_down(int n);
+
+void print_board_debug();
+
+void plot_pixel(int x, int y, short int color);
+
+void draw_one_block(int x, int y, short int color);
+
+void draw_picture();
+
+void clear_screen();
+
+int color[8]={0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF, 0xF4CE, 0x970F};
+
+int board[MAX_SIZE][MAX_SIZE];
+
+int BOARD_SIZE;
+
+volatile int pixel_buffer_start;
+
+int main(){
+    volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
+
+    pixel_buffer_start = *pixel_ctrl_ptr;
+
+    init(4);
+    print_board_debug();
+    shuffle();
+    print_board_debug();
+    draw_picture();
+    return 0;
+}
 
 void init(int n){
     int size = (n>=8)?8:n;
@@ -89,4 +128,30 @@ void print_board_debug(){
         printf("\n");
     }
     printf("------------------------------------------------------------\n");
+}
+
+void plot_pixel(int x, int y, short int color){
+    *(short int *)(pixel_buffer_start + (y << 10) + (x << 1)) = color;
+}
+
+void draw_one_block(int x, int y, short int color){             //(x,y)is the left top pixel
+    for(int i=x; i< x+50; i++)
+      for(int j=y; j< y+50; j++)
+         plot_pixel(i,j,color);
+}
+
+void draw_picture(){
+    clear_screen();
+    for(int i=0; i<BOARD_SIZE; i++){
+      for(int j=0; j<BOARD_SIZE; j++){
+         short int block_color = board[i][j];
+         draw_one_block(j*50,i*50,block_color);
+      }
+    }
+}
+
+void clear_screen(){
+    for(int i=0;i<320;i++)
+        for(int j=0;j<240;j++)
+            plot_pixel(i,j,0x0000);
 }

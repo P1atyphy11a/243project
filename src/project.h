@@ -7,7 +7,6 @@
 #include <stdlib.h>
 
 #define MAX_SIZE 8
-volatile int pixel_buffer_start;
 
 void init(int n);
 
@@ -27,5 +26,6 @@ void draw_one_block(int x, int y, short int color);
 
 void draw_picture();
 
+void clear_screen();
 
 #endif
