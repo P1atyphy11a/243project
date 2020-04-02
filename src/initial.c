@@ -6,7 +6,7 @@ extern short int board[MAX_SIZE][MAX_SIZE];
 
 extern int BOARD_SIZE;
 
-void init(int n){
+void init(int n){                                       //create the DEST_BOARD
     int size = (n>=8)?8:n;
     BOARD_SIZE = size;
     for(int i=0; i<size; i++){
@@ -16,7 +16,7 @@ void init(int n){
     }
 }
 
-void shuffle(){
+void shuffle(){                                         //create the puzzle by radomly shuffle the DEST_BOARD
     for(int i=0;i<rand()%20+10;i++){
         int key=rand()%4;
         int num=rand()%(BOARD_SIZE-1);

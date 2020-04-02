@@ -16,7 +16,7 @@ void draw_one_block(int x, int y, short int color){             //(x,y)is the le
 
 void draw_picture(){
     clear_screen();
-    for(int i=0; i<BOARD_SIZE; i++){
+    for(int i=0; i<BOARD_SIZE; i++){                            //only draw the actural puzzle board
       for(int j=0; j<BOARD_SIZE; j++){
          short int block_color = board[i][j];
          draw_one_block(j*50,i*50,block_color);
