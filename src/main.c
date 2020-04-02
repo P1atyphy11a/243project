@@ -2,7 +2,8 @@
 
 int color[8]={0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF, 0xF4CE, 0x970F};  // colors will be used for the puzzle
 
-int board[MAX_SIZE][MAX_SIZE];                                                  //array to store the puzzle status, MAX_SIZE=8
+short int board[MAX_SIZE][MAX_SIZE];                                                  //array to store the puzzle status, MAX_SIZE=8
+short int dest_board[MAX_SIZE][MAX_SIZE];
 
 int BOARD_SIZE;                                                                 //actural puzzle size, no bigger than MAX_SIZE
 
@@ -17,6 +18,6 @@ int main(){
     print_board_debug();
     shuffle();
     print_board_debug();
-    draw_picture();
+    draw_screen();
     return 0;
 }

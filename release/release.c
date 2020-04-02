@@ -18,15 +18,21 @@ void print_board_debug();
 
 void plot_pixel(int x, int y, short int color);
 
-void draw_one_block(int x, int y, short int color);
+void draw_one_block(int x, int y, short int color, int width);
 
-void draw_picture();
+void draw_screen();
+
+void draw_puzzle();
 
 void clear_screen();
 
+void draw_dest_board();
+
+
 int color[8]={0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF, 0xF4CE, 0x970F};  // colors will be used for the puzzle
 
-int board[MAX_SIZE][MAX_SIZE];                                                  //array to store the puzzle status, MAX_SIZE=8
+short int board[MAX_SIZE][MAX_SIZE];                                                  //array to store the puzzle status, MAX_SIZE=8
+short int dest_board[MAX_SIZE][MAX_SIZE];
 
 int BOARD_SIZE;                                                                 //actural puzzle size, no bigger than MAX_SIZE
 
@@ -41,15 +47,17 @@ int main(){
     print_board_debug();
     shuffle();
     print_board_debug();
-    draw_picture();
+    draw_screen();
     return 0;
 }
+
 void init(int n){                                       //create the DEST_BOARD
     int size = (n>=8)?8:n;
     BOARD_SIZE = size;
     for(int i=0; i<size; i++){
         for(int j=0; j<size; j++){
             board[i][j]=color[i];
+            dest_board[i][j]=board[i][j];
         }
     }
 }
@@ -129,23 +137,27 @@ void print_board_debug(){
     printf("------------------------------------------------------------\n");
 }
 
-
 void plot_pixel(int x, int y, short int color){
     *(short int *)(pixel_buffer_start + (y << 10) + (x << 1)) = color;
 }
 
-void draw_one_block(int x, int y, short int color){             //(x,y)is the left top pixel
-    for(int i=x; i< x+50; i++)
-      for(int j=y; j< y+50; j++)
+void draw_one_block(int x, int y, short int color, int width){             //(x,y)is the left top pixel
+    for(int i=x; i< x+width; i++)
+      for(int j=y; j< y+width; j++)
          plot_pixel(i,j,color);
 }
 
-void draw_picture(){
+void draw_screen(){
+    draw_puzzle();
+    draw_dest_board();
+}
+
+void draw_puzzle(){
     clear_screen();
     for(int i=0; i<BOARD_SIZE; i++){                            //only draw the actural puzzle board
       for(int j=0; j<BOARD_SIZE; j++){
          short int block_color = board[i][j];
-         draw_one_block(20+j*50,20+i*50,block_color);
+         draw_one_block(20+j*50,20+i*50,block_color, 50);
       }
     }
 }
@@ -156,3 +168,11 @@ void clear_screen(){
             plot_pixel(i,j,0xFFFA);
 }
 
+void draw_dest_board(){
+    for(int i=0; i<BOARD_SIZE; i++){
+        for(int j=0;j<BOARD_SIZE; j++){
+            short int block_color = dest_board[i][j];
+            draw_one_block(255+j*15, 15+i*15, block_color, 15);
+        }
+    }
+}

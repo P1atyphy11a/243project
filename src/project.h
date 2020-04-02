@@ -22,10 +22,14 @@ void print_board_debug();
 
 void plot_pixel(int x, int y, short int color);
 
-void draw_one_block(int x, int y, short int color);
+void draw_one_block(int x, int y, short int color, int width);
 
-void draw_picture();
+void draw_screen();
+
+void draw_puzzle();
 
 void clear_screen();
+
+void draw_dest_board();
 
 #endif

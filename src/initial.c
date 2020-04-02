@@ -3,6 +3,8 @@
 extern int color[8];
 
 extern short int board[MAX_SIZE][MAX_SIZE];
+extern short int dest_board[MAX_SIZE][MAX_SIZE];
+
 
 extern int BOARD_SIZE;
 
@@ -12,6 +14,7 @@ void init(int n){                                       //create the DEST_BOARD
     for(int i=0; i<size; i++){
         for(int j=0; j<size; j++){
             board[i][j]=color[i];
+            dest_board[i][j]=board[i][j];
         }
     }
 }
