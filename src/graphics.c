@@ -19,7 +19,7 @@ void draw_picture(){
     for(int i=0; i<BOARD_SIZE; i++){                            //only draw the actural puzzle board
       for(int j=0; j<BOARD_SIZE; j++){
          short int block_color = board[i][j];
-         draw_one_block(j*50,i*50,block_color);
+         draw_one_block(20+j*50,20+i*50,block_color);
       }
     }
 }
