@@ -1,7 +1,7 @@
 #include"project.h"
 
 extern int color[8];
- 
+
 extern short int board[MAX_SIZE][MAX_SIZE];
 
 extern int BOARD_SIZE;
@@ -31,7 +31,7 @@ void shuffle(){
             shift_right(num);
             printf("shift_right %d\n", num);
             break;
-        
+
         case 2:
             shift_up(num);
             printf("shift_up %d\n", num);
@@ -41,7 +41,7 @@ void shuffle(){
             shift_down(num);
             printf("shift_down %d\n", num);
             break;
-        
+
         default:
             break;
         }
@@ -89,4 +89,28 @@ void print_board_debug(){
         printf("\n");
     }
     printf("------------------------------------------------------------\n");
+}
+
+void plot_pixel(int x, int y, short int color)
+{
+    *(short int *)(pixel_buffer_start + (y << 10) + (x << 1)) = color;
+}
+
+void draw_one_block(int x, int y, short int color){             //(x,y)is the left top pixel
+    for(int i=x; i< x+50; i++){
+      for(int j=y; j< y+50; j++){
+         plot_pixel(i,j,color);
+      }
+    }
+
+}
+
+
+void draw_picture(){
+    for(int i=0; i<MAX_SIZE; i++){
+      for(int j=0; j<MAX_SIZE; j++){
+         short int block_color = board[i][j];
+         draw_one_block(j*50,i*50,block_color);
+      }
+    }
 }
