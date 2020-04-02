@@ -1,14 +1,24 @@
+#ifndef PROJECT
+#define PROJECT
+
+
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-short int color[7]={0xF000, 0x0FF0, 0x000F, 0xFFF0, 0x0FFF, 0xF00F, 0xFFFF};
+#define MAX_SIZE 8
 
-short int board[7][7];
+void init(int n);
 
-void init(int n){
-    int size = (n>=7)?7:n;
-    for(int i=0; i<size; i++){
-        for(int j=0; j<size; j++){
-            board[i][j]=color[i];
-        }
-    }
-}
+
+void shuffle();
+
+void shift_left(int n);
+void shift_right(int n);
+void shift_up(int n);
+void shift_down(int n);
+
+void print_board_debug();
+
+
+#endif
