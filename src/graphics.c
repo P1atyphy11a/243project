@@ -27,5 +27,5 @@ void draw_picture(){
 void clear_screen(){
     for(int i=0;i<320;i++)
         for(int j=0;j<240;j++)
-            plot_pixel(i,j,0x0000);
+            plot_pixel(i,j,0xFFFA);
 }

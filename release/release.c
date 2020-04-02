@@ -24,11 +24,11 @@ void draw_picture();
 
 void clear_screen();
 
-int color[8]={0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF, 0xF4CE, 0x970F};
+int color[8]={0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF, 0xF4CE, 0x970F};  // colors will be used for the puzzle
 
-int board[MAX_SIZE][MAX_SIZE];
+int board[MAX_SIZE][MAX_SIZE];                                                  //array to store the puzzle status, MAX_SIZE=8
 
-int BOARD_SIZE;
+int BOARD_SIZE;                                                                 //actural puzzle size, no bigger than MAX_SIZE
 
 volatile int pixel_buffer_start;
 
@@ -44,8 +44,7 @@ int main(){
     draw_picture();
     return 0;
 }
-
-void init(int n){
+void init(int n){                                       //create the DEST_BOARD
     int size = (n>=8)?8:n;
     BOARD_SIZE = size;
     for(int i=0; i<size; i++){
@@ -55,7 +54,7 @@ void init(int n){
     }
 }
 
-void shuffle(){
+void shuffle(){                                         //create the puzzle by radomly shuffle the DEST_BOARD
     for(int i=0;i<rand()%20+10;i++){
         int key=rand()%4;
         int num=rand()%(BOARD_SIZE-1);
@@ -130,6 +129,7 @@ void print_board_debug(){
     printf("------------------------------------------------------------\n");
 }
 
+
 void plot_pixel(int x, int y, short int color){
     *(short int *)(pixel_buffer_start + (y << 10) + (x << 1)) = color;
 }
@@ -142,10 +142,10 @@ void draw_one_block(int x, int y, short int color){             //(x,y)is the le
 
 void draw_picture(){
     clear_screen();
-    for(int i=0; i<BOARD_SIZE; i++){
+    for(int i=0; i<BOARD_SIZE; i++){                            //only draw the actural puzzle board
       for(int j=0; j<BOARD_SIZE; j++){
          short int block_color = board[i][j];
-         draw_one_block(j*50,i*50,block_color);
+         draw_one_block(20+j*50,20+i*50,block_color);
       }
     }
 }
@@ -153,5 +153,6 @@ void draw_picture(){
 void clear_screen(){
     for(int i=0;i<320;i++)
         for(int j=0;j<240;j++)
-            plot_pixel(i,j,0x0000);
+            plot_pixel(i,j,0xFFFA);
 }
+
