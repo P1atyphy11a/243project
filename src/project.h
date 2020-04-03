@@ -32,4 +32,6 @@ void clear_screen();
 
 void draw_dest_board();
 
+void get_input();
+
 #endif
