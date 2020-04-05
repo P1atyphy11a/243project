@@ -1,4 +1,8 @@
 #include "interupt.h"
+
+
+int sw;
+int press;
 /* ********************************************************************************
 * This program demonstrates use of interrupts with C code. The program
 *responds
@@ -14,7 +18,12 @@ int main(void) {
     config_GIC(); // configure the general interrupt controller
     config_KEYs(); // configure pushbutton KEYs to generate interrupts
     enable_A9_interrupts(); // enable interrupts in the A9 processor
-    while (1);
+    while (1){
+      volatile int * sw_ptr = (int *) 0xFF200040; // SW base address
+	    volatile int * led_ptr = (int *) 0xFF200000;
+	    sw = *(sw_ptr);
+	    *led_ptr = sw;
+    };
 }
 /* setup the KEY interrupts in the FPGA */
 void config_KEYs() {
@@ -31,6 +40,8 @@ void config_KEYs() {
 // Define the IRQ exception handler
 void __attribute__((interrupt)) __cs3_isr_irq(void) {
 // Read the ICCIAR from the CPU Interface in the GIC
+    volatile int * sw_ptr = (int *) 0xFF200040;
+
     int interrupt_ID = *((int *)0xFFFEC10C);
     if (interrupt_ID == 73)
         pushbutton_ISR();
@@ -39,6 +50,9 @@ void __attribute__((interrupt)) __cs3_isr_irq(void) {
     // Write to the End of Interrupt Register (ICCEOIR)
     *((int *)0xFFFEC110) = interrupt_ID;
 }
+
+
+
 // Define the remaining exception handlers
 void __attribute__((interrupt)) __cs3_reset(void) {
     while (1);
@@ -136,9 +150,12 @@ void config_interrupt(int N, int CPU_target) {
 void pushbutton_ISR(void) {
     /* KEY base address */
     volatile int * KEY_ptr = (int *) 0xFF200050;
+
+
+    volatile int * sw_ptr = (int *) 0xFF200040;
     /* HEX display base address */
     volatile int * HEX3_HEX0_ptr = (int *) 0xFF200020;
-    int press, HEX_bits;
+    int HEX_bits;
     press = *(KEY_ptr + 3); // read the pushbutton interrupt register
     *(KEY_ptr + 3) = press; // Clear the interrupt
     if (press & 0x1) // KEY0
