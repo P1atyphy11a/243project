@@ -22,6 +22,8 @@ int main(){
 
     pixel_buffer_start = *pixel_ctrl_ptr;
 
+    
+
     init(4);
     print_board_debug();
     shuffle();

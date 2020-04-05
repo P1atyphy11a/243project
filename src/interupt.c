@@ -12,19 +12,19 @@ int press;
 *pressed
 * on the LED display.
 ********************************************************************************/
-int main(void) {
-    disable_A9_interrupts(); // disable interrupts in the A9 processor
-    set_A9_IRQ_stack(); // initialize the stack pointer for IRQ mode
-    config_GIC(); // configure the general interrupt controller
-    config_KEYs(); // configure pushbutton KEYs to generate interrupts
-    enable_A9_interrupts(); // enable interrupts in the A9 processor
-    while (1){
-      volatile int * sw_ptr = (int *) 0xFF200040; // SW base address
-	    volatile int * led_ptr = (int *) 0xFF200000;
-	    sw = *(sw_ptr);
-	    *led_ptr = sw;
-    };
-}
+// int main(void) {
+//     disable_A9_interrupts(); // disable interrupts in the A9 processor
+//     set_A9_IRQ_stack(); // initialize the stack pointer for IRQ mode
+//     config_GIC(); // configure the general interrupt controller
+//     config_KEYs(); // configure pushbutton KEYs to generate interrupts
+//     enable_A9_interrupts(); // enable interrupts in the A9 processor
+//     while (1){
+//       volatile int * sw_ptr = (int *) 0xFF200040; // SW base address
+// 	    volatile int * led_ptr = (int *) 0xFF200000;
+// 	    sw = *(sw_ptr);
+// 	    *led_ptr = sw;
+//     };
+// }
 /* setup the KEY interrupts in the FPGA */
 void config_KEYs() {
     volatile int * KEY_ptr = (int *) 0xFF200050; // pushbutton KEY base address
@@ -167,5 +167,10 @@ void pushbutton_ISR(void) {
     else // press & 0x8, which is KEY3
     HEX_bits = 0b01001111;
     *HEX3_HEX0_ptr = HEX_bits;
+
+    volatile int * led_ptr = (int *) 0xFF200000;
+    sw = *(sw_ptr);
+    *led_ptr = sw;
+
     return;
 }
