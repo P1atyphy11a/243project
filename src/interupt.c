@@ -1,5 +1,5 @@
 #include "interupt.h"
-
+#include "project.h"
 
 int sw;
 int press;
@@ -171,6 +171,8 @@ void pushbutton_ISR(void) {
     volatile int * led_ptr = (int *) 0xFF200000;
     sw = *(sw_ptr);
     *led_ptr = sw;
+
+    shift(sw,press);
 
     return;
 }

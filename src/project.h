@@ -34,4 +34,6 @@ void draw_dest_board();
 
 void get_input();
 
+void shift(int sw,int press);
+
 #endif
