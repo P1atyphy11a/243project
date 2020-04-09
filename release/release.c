@@ -4,9 +4,7 @@
 #include <stdbool.h>
 
 #define MAX_SIZE 4
-
-int BOARD_SIZE;  
-
+int BOARD_SIZE;     
 void init(int n);
 
 
@@ -34,6 +32,7 @@ void draw_dest_board();
 void get_input();
 
 void shift(int sw,int press);
+
 void disable_A9_interrupts(void);
 
 void set_A9_IRQ_stack(void);
@@ -74,16 +73,28 @@ void dfs_output();
 
 void dfs(int start_id, int dest_id, int step);
 
+void autosolve();
+
+int pop_queue();
+
+void push_back(int n);
+void push_back_path(int n);
+
 void bfs(int start_id, int dest_id);
 
-void autosolve();
+void bfs_traceback(int start_id, int dest_id);
+
+void get_direction(int id1, int id2);
+
+void autosolve_bfs();
 
 int color[8]={0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF, 0xF4CE, 0x970F};  // colors will be used for the puzzle
 
 short int board[MAX_SIZE][MAX_SIZE];                                                  //array to store the puzzle status, MAX_SIZE=8
 short int dest_board[MAX_SIZE][MAX_SIZE];
 int number_board[MAX_SIZE][MAX_SIZE];
-                                                               //actural puzzle size, no bigger than MAX_SIZE
+
+                                                            //actural puzzle size, no bigger than MAX_SIZE
 
 volatile int pixel_buffer_start;
 
@@ -113,6 +124,30 @@ int main(){
     return 0;
 }
 
+void shift(int sw,int press){
+    int rowCol=sw>>9;  //1=col 0=row
+    int num=sw&0b0000000111;
+    bool cheat=((sw&0b0001010000)==(0b0001010000));
+    if(cheat&&AUTOS){
+        autosolve();
+        cheat=false;
+        return;
+    }
+    num=(num>=3)?3:num;
+    if(rowCol==1){         //col, shift up/down
+        if(press==1||press==2)
+            shift_down(num);  //key0,1 shift down
+        else    
+            shift_up(num);    //key 2,3 shift up
+    }
+    else{
+        if(press==1||press==2)
+            shift_right(num);  //key0,1 shift right
+        else    
+            shift_left(num);    //key 2,3 shift left
+    }
+    draw_screen();
+}
 
 int sw;
 int press;
@@ -435,6 +470,7 @@ void draw_dest_board(){
     }
 }
 
+
 int board_to_id(int (*board)[BOARD_SIZE]){
     int id=0;
     for(int i=0;i<BOARD_SIZE;i++)
@@ -629,18 +665,6 @@ void dfs(int start_id, int dest_id, int step){
     return;
 }
 
-
-
-
-
-
-// void bfs(int start_id, int dest_id){
-//     prev_node[dest_id]=-1;
-    
-
-
-// }
-
 void autosolve(){
     bool flag=false;
     for(int i=29;i>=0;i--){
@@ -679,27 +703,175 @@ void autosolve(){
     AUTOS=false;
 }
 
-void shift(int sw,int press){
-    int rowCol=sw>>9;  //1=col 0=row
-    int num=sw&0b0000000111;
-    bool cheat=((sw&0b0001010000)==(0b0001010000));
-    if(cheat&&AUTOS){
-        autosolve();
-        cheat=false;
-        return;
+int prev_node[19810];
+int visited_bfs[19810];
+int queue[20000];
+int back=0;
+int path_back=0;
+
+int path_queue[200];
+
+int pop_queue(){
+    int temp=queue[0];
+    for(int i=0;i<20000-1;i++)
+        queue[i]=queue[i+1];
+    back--;
+    return temp;
+}
+
+void push_back(int n){
+    queue[back]=n;
+    back++;
+    return;
+} 
+
+void push_back_path(int n){
+    printf("Push_back_path(%d)\n",n);
+    path_queue[path_back]=n;
+    path_back++;
+    return;
+} 
+
+void bfs(int start_id, int dest_id){
+    prev_node[dest_id]=dest_id;
+    push_back(start_id);
+    while(back!=0){
+        int curnode=pop_queue();
+        printf("current Node:%d\n",curnode);
+        if(curnode==dest_id){
+            printf("found\n");
+            return;
+        }
+        for(int i=0;i<3;i++){
+            for(int j=0;j<4;j++){
+                int temp;
+                switch(j){
+                    case 0:
+                        temp=id_shift_up(curnode,i);
+                        if(visited_bfs[temp]!=1){
+                            push_back(temp);
+                            prev_node[temp]=curnode;
+                        }
+                        
+                        break;
+                    case 1:
+                        temp=id_shift_down(curnode,i);
+                        if(visited_bfs[temp]!=1){
+                            push_back(temp);
+                            prev_node[temp]=curnode;
+                        }
+                        break;
+                    case 2:
+                        temp=id_shift_left(curnode,i);
+                        if(visited_bfs[temp]!=1){
+                            push_back(temp);
+                            prev_node[temp]=curnode;
+                        }
+                        break;
+                    case 3:
+                        temp=id_shift_right(curnode,i);
+                        if(visited_bfs[temp]!=1){
+                            push_back(temp);
+                            prev_node[temp]=curnode;
+                        }
+                        break;
+                }
+            }
+            // push_back(id_shift_up(curnode,i));
+            // push_back(id_shift_down(curnode,i));
+            // push_back(id_shift_left(curnode,i));
+            // push_back(id_shift_up(curnode,i));
+        }
+        visited_bfs[curnode]=1;
     }
-    num=(num>=3)?3:num;
-    if(rowCol==1){         //col, shift up/down
-        if(press==1||press==2)
-            shift_down(num);  //key0,1 shift down
-        else    
-            shift_up(num);    //key 2,3 shift up
+
+    printf("do not found\n");
+}
+
+void bfs_traceback(int start_id, int dest_id){
+    path_back=0;
+    int curr=start_id;
+    
+    printf("Start_id:%d\nPrev_Node:%d\n",curr,prev_node[curr]);
+    
+    while(prev_node[curr]!=curr){
+        printf("Current_Node:%d\nPrev_Node:%d\nPath_back:%d\n",curr,prev_node[curr],path_back);
+        push_back_path(curr);
+        curr=prev_node[curr];
     }
-    else{
-        if(press==1||press==2)
-            shift_right(num);  //key0,1 shift right
-        else    
-            shift_left(num);    //key 2,3 shift left
+    push_back_path(dest_id);
+    return;
+}
+
+int pair[2];
+
+void get_direction(int id1, int id2){
+    for(int i=0;i<3;i++){
+        for(int j=0;j<4;j++){
+            int temp;
+            switch(j){
+                case 0:
+                    temp=id_shift_up(id1,i);     
+                    if(temp==id2){
+                        pair[0]=i;
+                        pair[1]=j;
+                        return;
+                    }                   
+                    break;
+                case 1:
+                    temp=id_shift_down(id1,i);            
+                    if(temp==id2){
+                        pair[0]=i;
+                        pair[1]=j;
+                        return;
+                    }                
+                    break;
+                case 2:
+                    temp=id_shift_left(id1,i);           
+                    if(temp==id2){
+                        pair[0]=i;
+                        pair[1]=j;
+                        return;
+                    }                 
+                    break;
+                case 3:
+                    temp=id_shift_right(id1,i);
+                    if(temp==id2){
+                        pair[0]=i;
+                        pair[1]=j;
+                        return;
+                    }    
+                    break;
+            }
+        }
     }
-    draw_screen();
+}
+
+
+void autosolve_bfs(){
+    bfs(board_to_id(number_board),destID);
+    bfs_traceback(board_to_id(number_board),destID);
+    for(int i=0;i<path_back-1;i++){
+        get_direction(path_queue[i],path_queue[i+1]);
+        switch (pair[1]){
+        case 0:
+            shift_up(pair[0]);
+            draw_screen();
+            break;
+        case 1:
+            shift_down(pair[0]);
+            draw_screen();
+            break;
+        case 2:
+            shift_left(pair[0]);
+            draw_screen();
+            break;
+        case 3:
+            shift_right(pair[0]);
+            draw_screen();
+            break;
+        default:
+            break;
+        }
+    }
 }

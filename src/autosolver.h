@@ -26,6 +26,17 @@ void dfs_output();
 
 void dfs(int start_id, int dest_id, int step);
 
+void autosolve();
+
+int pop_queue();
+
+void push_back(int n);
+void push_back_path(int n);
+
 void bfs(int start_id, int dest_id);
 
-void autosolve();
+void bfs_traceback(int start_id, int dest_id);
+
+void get_direction(int id1, int id2);
+
+void autosolve_bfs();

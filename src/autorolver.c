@@ -202,18 +202,6 @@ void dfs(int start_id, int dest_id, int step){
     return;
 }
 
-
-
-
-
-
-// void bfs(int start_id, int dest_id){
-//     prev_node[dest_id]=-1;
-    
-
-
-// }
-
 void autosolve(){
     bool flag=false;
     for(int i=29;i>=0;i--){
@@ -250,4 +238,178 @@ void autosolve(){
             // for (int d = 1; d <= 32767; d++);
     }
     AUTOS=false;
+}
+
+int prev_node[19810];
+int visited_bfs[19810];
+int queue[20000];
+int back=0;
+int path_back=0;
+
+int path_queue[200];
+
+int pop_queue(){
+    int temp=queue[0];
+    for(int i=0;i<20000-1;i++)
+        queue[i]=queue[i+1];
+    back--;
+    return temp;
+}
+
+void push_back(int n){
+    queue[back]=n;
+    back++;
+    return;
+} 
+
+void push_back_path(int n){
+    printf("Push_back_path(%d)\n",n);
+    path_queue[path_back]=n;
+    path_back++;
+    return;
+} 
+
+void bfs(int start_id, int dest_id){
+    prev_node[dest_id]=dest_id;
+    push_back(start_id);
+    while(back!=0){
+        int curnode=pop_queue();
+        printf("current Node:%d\n",curnode);
+        if(curnode==dest_id){
+            printf("found\n");
+            return;
+        }
+        for(int i=0;i<3;i++){
+            for(int j=0;j<4;j++){
+                int temp;
+                switch(j){
+                    case 0:
+                        temp=id_shift_up(curnode,i);
+                        if(visited_bfs[temp]!=1){
+                            push_back(temp);
+                            prev_node[temp]=curnode;
+                        }
+                        
+                        break;
+                    case 1:
+                        temp=id_shift_down(curnode,i);
+                        if(visited_bfs[temp]!=1){
+                            push_back(temp);
+                            prev_node[temp]=curnode;
+                        }
+                        break;
+                    case 2:
+                        temp=id_shift_left(curnode,i);
+                        if(visited_bfs[temp]!=1){
+                            push_back(temp);
+                            prev_node[temp]=curnode;
+                        }
+                        break;
+                    case 3:
+                        temp=id_shift_right(curnode,i);
+                        if(visited_bfs[temp]!=1){
+                            push_back(temp);
+                            prev_node[temp]=curnode;
+                        }
+                        break;
+                }
+            }
+            // push_back(id_shift_up(curnode,i));
+            // push_back(id_shift_down(curnode,i));
+            // push_back(id_shift_left(curnode,i));
+            // push_back(id_shift_up(curnode,i));
+        }
+        visited_bfs[curnode]=1;
+    }
+
+    printf("do not found\n");
+}
+
+void bfs_traceback(int start_id, int dest_id){
+    path_back=0;
+    int curr=start_id;
+    
+    printf("Start_id:%d\nPrev_Node:%d\n",curr,prev_node[curr]);
+    
+    while(prev_node[curr]!=curr){
+        printf("Current_Node:%d\nPrev_Node:%d\nPath_back:%d\n",curr,prev_node[curr],path_back);
+        push_back_path(curr);
+        curr=prev_node[curr];
+    }
+    push_back_path(dest_id);
+    return;
+}
+
+int pair[2];
+
+void get_direction(int id1, int id2){
+    for(int i=0;i<3;i++){
+        for(int j=0;j<4;j++){
+            int temp;
+            switch(j){
+                case 0:
+                    temp=id_shift_up(id1,i);     
+                    if(temp==id2){
+                        pair[0]=i;
+                        pair[1]=j;
+                        return;
+                    }                   
+                    break;
+                case 1:
+                    temp=id_shift_down(id1,i);            
+                    if(temp==id2){
+                        pair[0]=i;
+                        pair[1]=j;
+                        return;
+                    }                
+                    break;
+                case 2:
+                    temp=id_shift_left(id1,i);           
+                    if(temp==id2){
+                        pair[0]=i;
+                        pair[1]=j;
+                        return;
+                    }                 
+                    break;
+                case 3:
+                    temp=id_shift_right(id1,i);
+                    if(temp==id2){
+                        pair[0]=i;
+                        pair[1]=j;
+                        return;
+                    }    
+                    break;
+            }
+        }
+    }
+}
+
+extern int number_board[MAX_SIZE][MAX_SIZE];
+
+void autosolve_bfs(){
+    bfs(board_to_id(number_board),destID);
+    bfs_traceback(board_to_id(number_board),destID);
+    for(int i=0;i<path_back-1;i++){
+        get_direction(path_queue[i],path_queue[i+1]);
+        switch (pair[1]){
+        case 0:
+            shift_up(pair[0]);
+            draw_screen();
+            break;
+        case 1:
+            shift_down(pair[0]);
+            draw_screen();
+            break;
+        case 2:
+            shift_left(pair[0]);
+            draw_screen();
+            break;
+        case 3:
+            shift_right(pair[0]);
+            draw_screen();
+            break;
+        default:
+            break;
+        }
+    }
 }
