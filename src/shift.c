@@ -1,8 +1,15 @@
 #include"project.h"
+#include"autosolver.h"
+#include <stdbool.h>
 
 void shift(int sw,int press){
     int rowCol=sw>>9;  //1=col 0=row
     int num=sw&0b00000000111;
+    bool cheat=sw&&0b00001010000;
+    if(cheat){
+        cheating();
+        return;
+    }
     num=(num>=3)?3:num;
     if(rowCol==1){         //col, shift up/down
         if(press==1||press==2)

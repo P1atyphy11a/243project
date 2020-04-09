@@ -25,7 +25,7 @@ void draw_puzzle(){
     for(int i=0; i<BOARD_SIZE; i++){                            //only draw the actural puzzle board
       for(int j=0; j<BOARD_SIZE; j++){
          short int block_color = board[i][j];
-         draw_one_block(20+j*50,20+i*50,block_color, 50);
+         draw_one_block(20+j*50*4/3,20+i*50*4/3,block_color, 50*4/3+1);
       }
     }
 }
@@ -40,7 +40,7 @@ void draw_dest_board(){
     for(int i=0; i<BOARD_SIZE; i++){
         for(int j=0;j<BOARD_SIZE; j++){
             short int block_color = dest_board[i][j];
-            draw_one_block(255+j*15, 15+i*15, block_color, 15);
+            draw_one_block(255+j*15*4/3, 15+i*15*4/3, block_color, 15*4/3+1);
         }
     }
 }

@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_SIZE 8
+#define MAX_SIZE 4
 
 void init(int n);
 

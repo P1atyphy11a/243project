@@ -1,9 +1,11 @@
-#include "project.h"
-#include "autosolver.h"
 #include <stdbool.h>
 #include <math.h>
+#include <stdio.h>
+#include<stdlib.h>
 
-extern int BOARD_SIZE;
+// extern int BOARD_SIZE;
+
+#define BOARD_SIZE 3
 
 int board_to_id(int (*board)[BOARD_SIZE]){
     int id=0;
@@ -23,7 +25,7 @@ void id_to_board(int (*board)[BOARD_SIZE], int id){
         while(tempID-pow(BOARD_SIZE,i)>=0){
             temp++;
             tempID-=pow(BOARD_SIZE, i);
-            printf("ID after sub:%d, count:%d\n",tempID, temp);
+            // printf("ID after sub:%d, count:%d\n",tempID, temp);
         }
 
         switch(i){
@@ -130,34 +132,31 @@ int id_shift_down(int id, int n){
     return board_to_id(temp_board);
 }
 
-int visited[19810];
-int prev_node[19810];
-int waveFront[19810];
-int pathPointer=0;
-int path[100];
+int graph[19810][6];
+
+void init_graph(){
+
+}
 
 int visited[19810];
 int path[3000];
 int cnt;
 int start,end;
-int flag=0;
 
 void dfs_output(){
     printf("%d->\n ", start);
-    for(int i=1;i<cnt-1;i++)
-        printf("%d->\n", path[i]);
+    // for(int i=1;i<cnt-1;i++)
+    //     printf("%d->\n", path[i]);
     printf("%d\n-------------------------------------------------------------\n", end);
 }
 
 void dfs(int start_id, int dest_id, int step){
     // printf("searching between %d and %d\n", start_id, dest_id);
-    if(flag==-1)return;
     if(start_id==dest_id){
         printf("found\n");
         cnt=step;
         printf("cnt:%d\n",cnt);
         dfs_output();
-        flag=-1;
        // goto END;
         return;
     }
@@ -199,18 +198,36 @@ void dfs(int start_id, int dest_id, int step){
     return;
 }
 
+int head,tail;
+int queue[20000]={0};
 
+// void bfs(){
+//     int i=0;
+//     int next_id=0;
+//     int flag=0;
+//     head=0;
+//     tail=0;
+//     queue[tail]=start;
 
+// }
 
+int main(){
+    int board[3][3]={{0,0,2},{1,0,1},{2,1,2}};
+    // for(int i=0;i<3;i++)
+    //     for(int j=0;j<3;j++)
+    //         board[i][j]=j;
 
-
-void bfs(int start_id, int dest_id){
-    prev_node[dest_id]=-1;
+        
+    // print_board_autosolve_test(board);
+    // printf("%d\n",board_to_id(board));
     
+    int testboard[3][3];
 
+    id_to_board(testboard,17055);
 
-}
-
-void cheating(){
-    
+    print_board_autosolve_test(testboard);
+    start = 17055;
+    end=19305;
+    dfs(start, end, 1);
+    return 0;
 }
