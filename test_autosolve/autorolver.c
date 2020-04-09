@@ -254,8 +254,11 @@ int main(){
     bfs(end,start);
     bfs_traceback(start,end);
     printf("\n--------------------------------------------------\nPath_back:%d\n",path_back);
-    for(int i=0;i<path_back;i++)
-        printf("%d -> ",path_queue[i]);
+    for(int i=0;i<path_back;i++){
+        id_to_board(testboard,path_queue[i]);
+        print_board_autosolve_test(testboard);
+    }
+        
 
     return 0;
 }
