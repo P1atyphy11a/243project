@@ -2,12 +2,15 @@
 #include"autosolver.h"
 #include <stdbool.h>
 
+extern bool AUTOS;
+
 void shift(int sw,int press){
     int rowCol=sw>>9;  //1=col 0=row
-    int num=sw&0b00000000111;
-    bool cheat=sw&&0b00001010000;
-    if(cheat){
-        cheating();
+    int num=sw&0b0000000111;
+    bool cheat=((sw&0b0001010000)==(0b0001010000));
+    if(cheat&&AUTOS){
+        autosolve();
+        cheat=false;
         return;
     }
     num=(num>=3)?3:num;

@@ -1,8 +1,11 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-#define MAX_SIZE 8
+#define MAX_SIZE 4
+
+int BOARD_SIZE;  
 
 void init(int n);
 
@@ -30,6 +33,7 @@ void draw_dest_board();
 
 void get_input();
 
+void shift(int sw,int press);
 void disable_A9_interrupts(void);
 
 void set_A9_IRQ_stack(void);
@@ -44,16 +48,46 @@ void pushbutton_ISR(void);
 
 void config_interrupt(int, int);
 
-void shift(int sw,int press);
+#define destID 19305
+
+int board_to_id(int (*board)[BOARD_SIZE]);
+
+void id_to_board(int (*board)[BOARD_SIZE], int id);
+
+void print_board_autosolve_test(int (*board)[BOARD_SIZE]);
+
+void shift_left_with_board(int (*board)[BOARD_SIZE],int n);
+
+void shift_right_with_board(int (*board)[BOARD_SIZE],int n);
+
+void shift_up_with_board(int (*board)[BOARD_SIZE],int n);
+
+void shift_down_with_board(int (*board)[BOARD_SIZE],int n);
+
+int id_shift_right(int id, int n);
+
+int id_shift_left(int id, int n);
+
+int id_shift_up(int id, int n);
+int id_shift_down(int id, int n);
+void dfs_output();
+
+void dfs(int start_id, int dest_id, int step);
+
+void bfs(int start_id, int dest_id);
+
+void autosolve();
 
 int color[8]={0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF, 0xF4CE, 0x970F};  // colors will be used for the puzzle
 
 short int board[MAX_SIZE][MAX_SIZE];                                                  //array to store the puzzle status, MAX_SIZE=8
 short int dest_board[MAX_SIZE][MAX_SIZE];
-
-int BOARD_SIZE;                                                                 //actural puzzle size, no bigger than MAX_SIZE
+int number_board[MAX_SIZE][MAX_SIZE];
+                                                               //actural puzzle size, no bigger than MAX_SIZE
 
 volatile int pixel_buffer_start;
+
+bool AUTOS=true;
 
 int main(){
 
@@ -68,7 +102,7 @@ int main(){
 
     pixel_buffer_start = *pixel_ctrl_ptr;
 
-    
+
 
     init(3);
     print_board_debug();
@@ -78,6 +112,7 @@ int main(){
     while(1);
     return 0;
 }
+
 
 int sw;
 int press;
@@ -255,6 +290,8 @@ void pushbutton_ISR(void) {
     return;
 }
 
+int UUDDLLRRBABA[30][2];
+
 void init(int n){                                       //create the DEST_BOARD
     int size = (n>=8)?8:n;
     BOARD_SIZE = size;
@@ -262,14 +299,19 @@ void init(int n){                                       //create the DEST_BOARD
         for(int j=0; j<size; j++){
             board[i][j]=color[i];
             dest_board[i][j]=board[i][j];
+            number_board[i][j]=i;
         }
     }
 }
 
-void shuffle(){                                         //create the puzzle by radomly shuffle the DEST_BOARD
-    for(int i=0;i<rand()%20+10;i++){
+void shuffle(){        
+    int times=rand()%20+10;
+    UUDDLLRRBABA[times][0]=-1;                               //create the puzzle by radomly shuffle the DEST_BOARD
+    for(int i=0;i<times;i++){
         int key=rand()%4;
         int num=rand()%(BOARD_SIZE-1);
+        UUDDLLRRBABA[i][0]=key;
+        UUDDLLRRBABA[i][1]=num;
         switch (key)
         {
         case 0:
@@ -301,34 +343,46 @@ void shuffle(){                                         //create the puzzle by r
 
 void shift_left(int n){
     short int temp=board[n][0];
+    int temp2 = number_board[n][0];
     for(int i=0;i<BOARD_SIZE-1;i++){
         board[n][i]=board[n][i+1];
+        number_board[n][i] = number_board[n][i+1];
     }
     board[n][BOARD_SIZE-1]=temp;
+    number_board[n][BOARD_SIZE-1]=temp2;
 }
 
 void shift_right(int n){
     short int temp=board[n][BOARD_SIZE-1];
+    int temp2 = number_board[n][BOARD_SIZE-1];
     for(int i=BOARD_SIZE-1;i>0;i--){
         board[n][i]=board[n][i-1];
+        number_board[n][i]=number_board[n][i-1];
     }
     board[n][0]=temp;
+    number_board[n][0]=temp2;
 }
 
 void shift_up(int n){
     short int temp=board[0][n];
+    int temp2 = number_board[0][n];
     for(int i=0;i<BOARD_SIZE-1;i++){
         board[i][n]=board[i+1][n];
+        number_board[i][n]=number_board[i+1][n];
     }
     board[BOARD_SIZE-1][n]=temp;
+    number_board[BOARD_SIZE-1][n]=temp2;
 }
 
 void shift_down(int n){
     short int temp=board[BOARD_SIZE-1][n];
+    int temp2 = number_board[BOARD_SIZE-1][n];
     for(int i=BOARD_SIZE-1;i>0;i--){
         board[i][n]=board[i-1][n];
+        number_board[i][n]=number_board[i-1][n];
     }
     board[0][n]=temp;
+    number_board[0][n]=temp2;
 }
 
 void print_board_debug(){
@@ -380,9 +434,260 @@ void draw_dest_board(){
         }
     }
 }
+
+int board_to_id(int (*board)[BOARD_SIZE]){
+    int id=0;
+    for(int i=0;i<BOARD_SIZE;i++)
+        for(int j=0;j<BOARD_SIZE;j++){
+            id+=board[i][j]*(pow(BOARD_SIZE,BOARD_SIZE*i+j));
+        }
+    return id;
+}
+
+void id_to_board(int (*board)[BOARD_SIZE], int id){
+    int tempID=id;
+    // int temp;
+
+    for(int i=8;i>=0;i--){
+        int temp=0;
+        while(tempID-pow(BOARD_SIZE,i)>=0){
+            temp++;
+            tempID-=pow(BOARD_SIZE, i);
+            printf("ID after sub:%d, count:%d\n",tempID, temp);
+        }
+
+        switch(i){
+            case 0:
+                board[0][0]=temp;
+                break;
+            case 1:
+                board[0][1]=temp;
+                break;
+            case 2:
+                board[0][2]=temp;
+                break;
+            case 3:
+                board[1][0]=temp;
+                break;
+            case 4:
+                board[1][1]=temp;
+                break;
+            case 5:
+                board[1][2]=temp;
+                break;
+            case 6:
+                board[2][0]=temp;
+                break;
+            case 7:
+                board[2][1]=temp;
+                break;
+            case 8:
+                board[2][2]=temp;
+                break;
+            default:
+                break;
+        }
+
+    }
+
+}
+
+void print_board_autosolve_test(int (*board)[BOARD_SIZE]){
+    for(int i=0;i<BOARD_SIZE;i++){
+        for(int j=0;j<BOARD_SIZE;j++)
+            printf("%d ", board[i][j]);
+        printf("\n");
+    }
+}
+
+void shift_left_with_board(int (*board)[BOARD_SIZE],int n){
+    short int temp=board[n][0];
+    for(int i=0;i<BOARD_SIZE-1;i++){
+        board[n][i]=board[n][i+1];
+    }
+    board[n][BOARD_SIZE-1]=temp;
+}
+
+void shift_right_with_board(int (*board)[BOARD_SIZE],int n){
+    short int temp=board[n][BOARD_SIZE-1];
+    for(int i=BOARD_SIZE-1;i>0;i--){
+        board[n][i]=board[n][i-1];
+    }
+    board[n][0]=temp;
+}
+
+void shift_up_with_board(int (*board)[BOARD_SIZE],int n){
+    short int temp=board[0][n];
+    for(int i=0;i<BOARD_SIZE-1;i++){
+        board[i][n]=board[i+1][n];
+    }
+    board[BOARD_SIZE-1][n]=temp;
+}
+
+void shift_down_with_board(int (*board)[BOARD_SIZE],int n){
+    short int temp=board[BOARD_SIZE-1][n];
+    for(int i=BOARD_SIZE-1;i>0;i--){
+        board[i][n]=board[i-1][n];
+    }
+    board[0][n]=temp;
+}
+
+int id_shift_right(int id, int n){
+    int temp_board[BOARD_SIZE][BOARD_SIZE];
+    id_to_board(temp_board, id);
+    shift_right_with_board(temp_board, n);
+    return board_to_id(temp_board);
+}
+
+int id_shift_left(int id, int n){
+    int temp_board[BOARD_SIZE][BOARD_SIZE];
+    id_to_board(temp_board, id);
+    shift_left_with_board(temp_board, n);
+    return board_to_id(temp_board);
+}
+
+int id_shift_up(int id, int n){
+    int temp_board[BOARD_SIZE][BOARD_SIZE];
+    id_to_board(temp_board, id);
+    shift_up_with_board(temp_board, n);
+    return board_to_id(temp_board);
+}
+
+int id_shift_down(int id, int n){
+    int temp_board[BOARD_SIZE][BOARD_SIZE];
+    id_to_board(temp_board, id);
+    shift_down_with_board(temp_board, n);
+    return board_to_id(temp_board);
+}
+
+// int visited[19810];
+// int prev_node[19810];
+// int waveFront[19810];
+// int pathPointer=0;
+// int path[100];
+
+int visited[19810];
+int path[3000];
+int cnt;
+int start,end;
+int flag=0;
+
+void dfs_output(){
+    printf("%d->\n ", start);
+    for(int i=1;i<cnt-1;i++)
+        printf("%d->\n", path[i]);
+    printf("%d\n-------------------------------------------------------------\n", end);
+}
+
+void dfs(int start_id, int dest_id, int step){
+    // printf("searching between %d and %d\n", start_id, dest_id);
+    if(flag==-1)return;
+    if(start_id==dest_id){
+        printf("found\n");
+        cnt=step;
+        printf("cnt:%d\n",cnt);
+        dfs_output();
+        flag=-1;
+       // goto END;
+        return;
+    }
+        
+    
+    for(int i=0;i<BOARD_SIZE;i++){
+        for(int j=0;j<4;j++){
+            int tempid;
+            switch (j)
+            {
+            case 0:
+                tempid=id_shift_left(start_id, i);
+                break;
+            case 1:
+                tempid=id_shift_right(start_id, i);
+                break;
+            case 2:
+                tempid=id_shift_up(start_id, i);
+                break;
+            case 3:
+                tempid=id_shift_down(start_id, i);
+                break;
+            default:
+                break;
+            }
+            if(visited[tempid]!=1){
+                visited[tempid]=1;
+                path[step]=tempid;
+                dfs(tempid,dest_id,step+1);
+                visited[tempid]=0;
+            }
+        }
+
+        // dfs(id_shift_left(start_id, i),dest_id);
+        // dfs(id_shift_right(start_id, i),dest_id);
+        // dfs(id_shift_up(start_id, i),dest_id);
+        // dfs(id_shift_down(start_id, i),dest_id);
+    }
+    return;
+}
+
+
+
+
+
+
+// void bfs(int start_id, int dest_id){
+//     prev_node[dest_id]=-1;
+    
+
+
+// }
+
+void autosolve(){
+    bool flag=false;
+    for(int i=29;i>=0;i--){
+        if(UUDDLLRRBABA[i+1][0]==-1)
+            flag=true;
+        if(!flag)continue;
+        switch (UUDDLLRRBABA[i][0])
+        {
+        case 1:
+            shift_left(UUDDLLRRBABA[i][0]);
+            printf("shift_left %d\n", UUDDLLRRBABA[i][0]);
+            break;
+
+        case 0:
+            shift_right(UUDDLLRRBABA[i][0]);
+            printf("shift_right %d\n", UUDDLLRRBABA[i][0]);
+            break;
+
+        case 3:
+            shift_up(UUDDLLRRBABA[i][0]);
+            printf("shift_up %d\n", UUDDLLRRBABA[i][0]);
+            break;
+
+        case 2:
+            shift_down(UUDDLLRRBABA[i][0]);
+            printf("shift_down %d\n", UUDDLLRRBABA[i][0]);
+            break;
+
+        default:
+            break;
+        }
+        draw_screen();
+        for (int c = 1; c <= 32767; c++);
+            // for (int d = 1; d <= 32767; d++);
+    }
+    AUTOS=false;
+}
+
 void shift(int sw,int press){
     int rowCol=sw>>9;  //1=col 0=row
-    int num=sw&0b00000000111;
+    int num=sw&0b0000000111;
+    bool cheat=((sw&0b0001010000)==(0b0001010000));
+    if(cheat&&AUTOS){
+        autosolve();
+        cheat=false;
+        return;
+    }
     num=(num>=3)?3:num;
     if(rowCol==1){         //col, shift up/down
         if(press==1||press==2)

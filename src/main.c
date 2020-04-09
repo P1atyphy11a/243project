@@ -10,6 +10,8 @@ int BOARD_SIZE;                                                                 
 
 volatile int pixel_buffer_start;
 
+bool AUTOS=true;
+
 int main(){
 
 
@@ -25,7 +27,7 @@ int main(){
 
 
 
-    init(4);
+    init(3);
     print_board_debug();
     shuffle();
     print_board_debug();
@@ -33,3 +35,4 @@ int main(){
     while(1);
     return 0;
 }
+

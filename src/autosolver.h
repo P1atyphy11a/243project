@@ -27,3 +27,5 @@ void dfs_output();
 void dfs(int start_id, int dest_id, int step);
 
 void bfs(int start_id, int dest_id);
+
+void autosolve();

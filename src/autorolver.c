@@ -2,8 +2,11 @@
 #include "autosolver.h"
 #include <stdbool.h>
 #include <math.h>
+#include <time.h>
 
 extern int BOARD_SIZE;
+extern int UUDDLLRRBABA[30][2];
+extern bool AUTOS;
 
 int board_to_id(int (*board)[BOARD_SIZE]){
     int id=0;
@@ -130,11 +133,11 @@ int id_shift_down(int id, int n){
     return board_to_id(temp_board);
 }
 
-int visited[19810];
-int prev_node[19810];
-int waveFront[19810];
-int pathPointer=0;
-int path[100];
+// int visited[19810];
+// int prev_node[19810];
+// int waveFront[19810];
+// int pathPointer=0;
+// int path[100];
 
 int visited[19810];
 int path[3000];
@@ -204,13 +207,47 @@ void dfs(int start_id, int dest_id, int step){
 
 
 
-void bfs(int start_id, int dest_id){
-    prev_node[dest_id]=-1;
+// void bfs(int start_id, int dest_id){
+//     prev_node[dest_id]=-1;
     
 
 
-}
+// }
 
-void cheating(){
-    
+void autosolve(){
+    bool flag=false;
+    for(int i=29;i>=0;i--){
+        if(UUDDLLRRBABA[i+1][0]==-1)
+            flag=true;
+        if(!flag)continue;
+        switch (UUDDLLRRBABA[i][0])
+        {
+        case 1:
+            shift_left(UUDDLLRRBABA[i][0]);
+            printf("shift_left %d\n", UUDDLLRRBABA[i][0]);
+            break;
+
+        case 0:
+            shift_right(UUDDLLRRBABA[i][0]);
+            printf("shift_right %d\n", UUDDLLRRBABA[i][0]);
+            break;
+
+        case 3:
+            shift_up(UUDDLLRRBABA[i][0]);
+            printf("shift_up %d\n", UUDDLLRRBABA[i][0]);
+            break;
+
+        case 2:
+            shift_down(UUDDLLRRBABA[i][0]);
+            printf("shift_down %d\n", UUDDLLRRBABA[i][0]);
+            break;
+
+        default:
+            break;
+        }
+        draw_screen();
+        for (int c = 1; c <= 32767; c++);
+            // for (int d = 1; d <= 32767; d++);
+    }
+    AUTOS=false;
 }

@@ -9,6 +9,8 @@ extern int number_board[MAX_SIZE][MAX_SIZE];
 
 extern int BOARD_SIZE;
 
+int UUDDLLRRBABA[30][2];
+
 void init(int n){                                       //create the DEST_BOARD
     int size = (n>=8)?8:n;
     BOARD_SIZE = size;
@@ -21,10 +23,14 @@ void init(int n){                                       //create the DEST_BOARD
     }
 }
 
-void shuffle(){                                         //create the puzzle by radomly shuffle the DEST_BOARD
-    for(int i=0;i<rand()%20+10;i++){
+void shuffle(){        
+    int times=rand()%20+10;
+    UUDDLLRRBABA[times][0]=-1;                               //create the puzzle by radomly shuffle the DEST_BOARD
+    for(int i=0;i<times;i++){
         int key=rand()%4;
         int num=rand()%(BOARD_SIZE-1);
+        UUDDLLRRBABA[i][0]=key;
+        UUDDLLRRBABA[i][1]=num;
         switch (key)
         {
         case 0:
@@ -84,7 +90,7 @@ void shift_up(int n){
         number_board[i][n]=number_board[i+1][n];
     }
     board[BOARD_SIZE-1][n]=temp;
-    number_board[BOARD_SIZE-1][n]=temp2
+    number_board[BOARD_SIZE-1][n]=temp2;
 }
 
 void shift_down(int n){
