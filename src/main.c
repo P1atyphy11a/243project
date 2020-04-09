@@ -4,6 +4,7 @@ int color[8]={0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF, 0xF4CE, 0x970F};  
 
 short int board[MAX_SIZE][MAX_SIZE];                                                  //array to store the puzzle status, MAX_SIZE=8
 short int dest_board[MAX_SIZE][MAX_SIZE];
+int number_board[MAX_SIZE][MAX_SIZE];
 
 int BOARD_SIZE;                                                                 //actural puzzle size, no bigger than MAX_SIZE
 
@@ -22,7 +23,7 @@ int main(){
 
     pixel_buffer_start = *pixel_ctrl_ptr;
 
-    
+
 
     init(4);
     print_board_debug();
